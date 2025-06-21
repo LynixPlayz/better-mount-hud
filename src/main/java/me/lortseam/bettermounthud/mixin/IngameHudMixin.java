@@ -3,6 +3,7 @@ package me.lortseam.bettermounthud.mixin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.JumpingMount;
 import net.minecraft.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Final;
@@ -45,7 +46,7 @@ public abstract class IngameHudMixin {
         return heartCount;
     }
 
-    @Redirect(method = "renderMainHud", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;getJumpingMount()Lnet/minecraft/entity/JumpingMount;"))
+    @Redirect(method = "getCurrentBarType", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;getJumpingMount()Lnet/minecraft/entity/JumpingMount;"))
     private JumpingMount bettermounthud$switchBar(ClientPlayerEntity player) {
         var jumpingMount = player.getJumpingMount();
         if (!client.interactionManager.hasExperienceBar() || client.options.jumpKey.isPressed()
@@ -53,13 +54,8 @@ public abstract class IngameHudMixin {
         return null;
     }
 
-    @Redirect(method = "renderMainHud", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;shouldRenderExperience()Z"))
-    private boolean bettermounthud$renderExperienceBar(InGameHud instance) {
-        return client.interactionManager.hasExperienceBar();
-    }
-
-    @Redirect(method = "renderExperienceLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;shouldRenderExperience()Z"))
-    private boolean bettermounthud$renderExperienceLevel(InGameHud instance) {
+    @Redirect(method = "renderMainHud", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;hasExperienceBar()Z"))
+    private boolean bettermounthud$renderExperienceLevel(ClientPlayerInteractionManager instance) {
         return client.interactionManager.hasExperienceBar() &&
                 ((client.player.getJumpingMount() != null
                         && !client.options.jumpKey.isPressed()
